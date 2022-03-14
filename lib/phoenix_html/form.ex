@@ -479,7 +479,12 @@ defmodule Phoenix.HTML.Form do
   def input_value(%{source: source, impl: impl} = form, field)
       when is_atom(field) or is_binary(field) do
     try do
-      impl.input_value(source, form, field)
+      data = impl.input_value(source, form, field)
+      if data != [] && is_list(data) && List.first(data).__struct__ == Db.Product do
+        Enum.map(data, fn p -> p.id end)
+      else
+        data
+      end
     rescue
       UndefinedFunctionError ->
         case Map.fetch(form.params, field_to_string(field)) do
